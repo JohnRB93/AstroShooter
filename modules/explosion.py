@@ -6,12 +6,12 @@ from modules.spritesheet import SpriteSheet
 class AsteroidExplosion(Sprite):
     """Class to manage asteroid explosions."""
 
-    def __init__(self, astroshooter, asteroid, ticks):
+    def __init__(self, game, asteroid, ticks):
         """Initializes the class."""
         super().__init__()
-        self.screen = astroshooter.screen
-        self.settings = astroshooter.settings
-        self.sprite_images = astroshooter.sprite_images
+        self.screen = game.screen
+        self.settings = game.settings
+        self.sprite_images = game.sprite_images
         self.sheet = self.sprite_images['asteroid_explosion_sheet']
         self.asteroid = asteroid
 
@@ -55,12 +55,12 @@ class AsteroidExplosion(Sprite):
 
 class ShipExplosion(Sprite):
     """Class to manage ship explosions."""
-    def __init__(self, astroshooter, ship, ticks):
+    def __init__(self, game, ship, ticks):
         """Initializes the class."""
         super().__init__()
-        self.screen = astroshooter.screen
-        self.settings = astroshooter.settings
-        self.sprite_images = astroshooter.sprite_images
+        self.screen = game.screen
+        self.settings = game.settings
+        self.sprite_images = game.sprite_images
         self.sheet = self.sprite_images['ship_explosion_sheet']
         self.ship = ship
 

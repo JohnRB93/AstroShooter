@@ -4,11 +4,11 @@ import json
 class Stats():
     """Class to manage score, statistics, etc."""
 
-    def __init__(self, astroshooter):
+    def __init__(self, game):
         """Initializes score, statistics, etc."""
-        self.screen = astroshooter.screen
+        self.screen = game.screen
         self.screen_rect = self.screen.get_rect()
-        self.settings = astroshooter.settings
+        self.settings = game.settings
         self.enemies_destroyed = 0
         self.asteroids_destroyed = 0
         self.game_intro_active = True

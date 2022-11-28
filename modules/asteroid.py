@@ -5,13 +5,13 @@ from pygame.sprite import Sprite
 class Asteroid(Sprite):
     """Class to manage an astriod."""
 
-    def __init__(self, astroshooter):
+    def __init__(self, game):
         """Initializes the asteriod."""
         super().__init__()
-        self.screen = astroshooter.screen
-        self.settings = astroshooter.settings
-        self.screen_rect = astroshooter.screen.get_rect()
-        self.sprite_images = astroshooter.sprite_images
+        self.screen = game.screen
+        self.settings = game.settings
+        self.screen_rect = game.screen.get_rect()
+        self.sprite_images = game.sprite_images
         
         self.original_image = self.sprite_images['asteroid']
         self.original_image.set_colorkey(self.settings.color_key)

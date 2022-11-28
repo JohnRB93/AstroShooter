@@ -8,13 +8,13 @@ from random import randint
 class FireWork(Sprite):
     """Manages fireworks."""
 
-    def __init__(self, astroshooter, ticks):
+    def __init__(self, game, ticks):
         """Initializes the firework."""
         super().__init__()
-        self.screen = astroshooter.screen
-        self.screen_rect = astroshooter.screen_rect
-        self.settings = astroshooter.settings
-        self.sprite_images = astroshooter.sprite_images
+        self.screen = game.screen
+        self.screen_rect = game.screen_rect
+        self.settings = game.settings
+        self.sprite_images = game.sprite_images
         self.sheet = self._get_firework_sheet()
         self.coordinate = self._get_coordinate()
         self.WIDTH = self.HEIGHT = 200

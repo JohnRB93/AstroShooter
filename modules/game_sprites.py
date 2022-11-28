@@ -4,9 +4,9 @@ import sys
 class GameSprites():
     """Class to hold sprite images."""
 
-    def __init__(self, astrogame):
+    def __init__(self, game):
         """Initializes the loading of sprite images."""
-        self.screen = astrogame.screen
+        self.screen = game.screen
         self.images = self._get_sprite_images_dict()
 
     def _get_sprite_images_dict(self):

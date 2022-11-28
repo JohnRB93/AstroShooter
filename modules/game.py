@@ -1,10 +1,3 @@
-"""
-TODO:
-      Implement online high score funcionality.
-      Implement levels.
-      Implement boss at end of levels.
-"""
-
 import sys
 import pygame
 
@@ -13,6 +6,7 @@ from random import randint
 
 from modules.settings import Settings
 from modules.game_sprites import GameSprites
+from modules.sound import Sounds
 from modules.ship import Ship
 from modules.bullet import Bullet
 from modules.asteroid import Asteroid
@@ -42,6 +36,7 @@ class AstroShooter:
         game_sprites = GameSprites(self)
         self.sprite_images = game_sprites.images
         pygame.display.set_caption("Astro Shooter")
+        self.game_audio = Sounds()
         
         self.ship = pygame.sprite.GroupSingle(Ship(self))
         self.bullets = pygame.sprite.Group()
@@ -88,7 +83,7 @@ class AstroShooter:
                 self.pause_screen()
 
             if self.stats.lost_ship and not self.stats.game_over:
-                mixer.music.stop()
+                self.game_audio.stop_music()
                 self.reset_screen()
 
             if self.stats.game_over:
@@ -100,8 +95,9 @@ class AstroShooter:
                     self.stats.save_high_score()
                 self.game_over_screen()
                 if self.stats.game_active:
-                    self.change_music(self.settings.background_music,
-                                      self.settings.background_music_vol)
+                    self.game_audio.change_music(
+                        self.settings.background_music,
+                        self.settings.background_music_vol)
                     continue
                 sys.exit()
                 
@@ -111,15 +107,14 @@ class AstroShooter:
 
     def intro_screen(self):
         """Displays the introductory sequence."""
-        self.change_music(self.settings.intro_music,
-                          self.settings.background_music_vol+.1, False)
+        self.game_audio.change_music(
+            self.settings.intro_music,
+            self.settings.background_music_vol+.4, False)
         self.game_intro.display_game_intro(pygame.time.get_ticks())
 
     def start_screen(self):
         """Displays the start screen to allow the player to start the game."""
-        if mixer.music.get_busy():
-            mixer.music.unload()
-
+        self.game_audio.unload_music()
         self.ship.sprite.blitme()
         self.start_button.render_text('Start')
         self.about_button.render_text('About')
@@ -156,13 +151,13 @@ class AstroShooter:
         with the 'p' key until the player unpauses the game with the
         same key.
         """
-        mixer.music.pause()
+        self.game_audio.set_paused_music(True)
         while True:
             for event in pygame.event.get():
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_p:
                         self.stats.paused = False
-                        mixer.music.unpause()
+                        self.game_audio.set_paused_music(False)
                         return
 
     def reset_screen(self):
@@ -176,7 +171,7 @@ class AstroShooter:
         self._plot_initial_stars()
         self.ship.add(Ship(self))
         self.ship.sprite.rect.midleft = self.screen_rect.midleft
-        self.change_music(self.settings.background_music,
+        self.game_audio.change_music(self.settings.background_music,
                           self.settings.background_music_vol)
         pygame.event.clear()
         self.stats.game_active = True
@@ -219,8 +214,9 @@ class AstroShooter:
         font_text_rect.center = self.screen_rect.center
         self.screen.blit(font_text, font_text_rect)
         pygame.display.flip()
-        self.change_music(self.settings.game_over_soundtrack,
-                          self.settings.background_music_vol)
+        self.game_audio.change_music(
+            self.settings.game_over_soundtrack,
+            self.settings.background_music_vol)
         pygame.time.wait(1200)
         self._get_choice(font_text_rect)
 
@@ -408,7 +404,7 @@ class AstroShooter:
                 self.stats.game_active = True
                 self.stats.start_button_active = False
                 self.stats.about_button_active = False
-                self.change_music(self.settings.background_music,
+                self.game_audio.change_music(self.settings.background_music,
                                   self.settings.background_music_vol)
                 pygame.mouse.set_visible = False
             elif self.about_button.rect.collidepoint(click_pos[0], click_pos[1]):
@@ -429,12 +425,13 @@ class AstroShooter:
         """Creates a bullet and adds it to the bullet group."""
         self.bullets.add(Bullet(self))
         if not self.ship.sprite.powered_up:
-            bullet_sound = mixer.Sound(self.settings.fire_bullet_sound)
+            self.game_audio.play_sound_effect(
+                self.settings.fire_bullet_sound,
+                self.settings.fire_bullet_sound_vol)
         else:
-            bullet_sound = mixer.Sound(self.settings.fire_super_bullet_sound)
-
-        bullet_sound.set_volume(self.settings.fire_bullet_sound_vol)
-        bullet_sound.play()
+            self.game_audio.play_sound_effect(
+                self.settings.fire_super_bullet_sound,
+                self.settings.fire_bullet_sound_vol)
 
     def update_game(self):
         """Calls update methods to update game attributes."""
@@ -447,38 +444,6 @@ class AstroShooter:
         self.update_power_ups()
         self.stats.render_stats()
         self.update_screen()
-                
-    def change_music(self, next_soundtrack, volume, loop=True):
-        """
-        Unloads the currently playing music(if any)
-        and loads the next music to play.
-        """
-        if mixer.music.get_busy():
-            mixer.music.unload()
-
-        try:
-            mixer.music.load(next_soundtrack)
-        except:
-            FileNotFoundError('The audio file was not found.')
-        finally:
-            mixer.music.set_volume(volume)
-            if loop:
-                mixer.music.play(-1)
-            else:
-                mixer.music.play()
-
-    def play_sound_effect(self, sound_effect, volume):
-        """
-        Plays the sound effect file provided in the first argument, sets the
-        volume to the specified value in the second argument.
-        """
-        try:
-            sound = mixer.Sound(sound_effect)
-        except:
-            FileNotFoundError('The audio file was not found.')
-        finally:
-            sound.set_volume(volume)
-            sound.play()
 
     def update_bullets(self):
         """Updates the position of bullets and gets rid of old ones."""
@@ -631,8 +596,8 @@ class AstroShooter:
     def _ship_gain_power_up(self):
         """Grants the player a temporary power-up."""
         self.power_ups.empty()
-        self.play_sound_effect(self.settings.power_up_sound,
-                               self.settings.power_up_sound_vol)
+        self.game_audio.play_sound_effect(self.settings.power_up_sound,
+                                        self.settings.power_up_sound_vol)
         self.ship.sprite.powered_up = True
         self.ship.sprite.update_power_up()
 
@@ -669,13 +634,15 @@ class AstroShooter:
                 if sprite_str == 'enemy':
                     self.explosions.add(ShipExplosion(self, sprite, ticks))
                     self.stats.score += self.settings.ry_enemy_points
-                    self.play_sound_effect(self.settings.ship_explosion_sound,
-                                           self.settings.ship_explosion_vol)
+                    self.game_audio.play_sound_effect(
+                        self.settings.ship_explosion_sound,
+                        self.settings.ship_explosion_vol)
                 elif sprite_str == 'asteroid':
                     self.explosions.add(AsteroidExplosion(self, sprite, ticks))
                     self.stats.score += self.settings.asteroid_points
-                    self.play_sound_effect(self.settings.asteroid_explosion_sound,
-                                           self.settings.asteroid_explosion_vol)
+                    self.game_audio.play_sound_effect(
+                        self.settings.asteroid_explosion_sound,
+                        self.settings.asteroid_explosion_vol)
                 sprite_group.remove(sprite)
 
             sprite.hit = True
@@ -688,8 +655,9 @@ class AstroShooter:
         self.stats.ships_left -= 1
         self.stats.game_active = False
         self.stats.lost_ship = True
-        self.play_sound_effect(self.settings.ship_explosion_sound,
-                               self.settings.ship_explosion_vol)
+        self.game_audio.play_sound_effect(
+            self.settings.ship_explosion_sound,
+            self.settings.ship_explosion_vol)
         if self.stats.ships_left == 0:
             self.stats.game_over = True
             
@@ -707,7 +675,3 @@ class AstroShooter:
         self.asteroids.draw(self.screen)
         self.explosions.draw(self.screen)
         pygame.display.flip()
-
-if __name__ == '__main__':
-    astroshooter = AstroShooter()
-    astroshooter.run_game()

@@ -8,12 +8,13 @@ from modules.bullet import EnemyBullet
 class PurpleGrayEnemy(Sprite):
     """Class to manage enemies that moves left on the screen."""
 
-    def __init__(self, astroshooter):
+    def __init__(self, game):
         """Initializes the puple/gray enemy."""
         super().__init__()
-        self.settings = astroshooter.settings
-        self.screen_rect = astroshooter.screen_rect
-        self.sprite_images = astroshooter.sprite_images
+        self.settings = game.settings
+        self.screen_rect = game.screen_rect
+        self.sprite_images = game.sprite_images
+        self.game_audio = game.game_audio
 
         self.direction = {
             'up': False,
@@ -45,7 +46,7 @@ class PurpleGrayEnemy(Sprite):
             self.x -= self.settings.pg_enemy_speed
             self.rect.x = self.x
 
-    def update_individual(self, astroshooter, current_ticks=0):
+    def update_individual(self, game, current_ticks=0):
         """Updates the individual instance of enemy, seperate from the Group."""
         if current_ticks > 0:
             if current_ticks - self.init_hit_ticks >= self.HIT_TICK_LIMIT:
@@ -59,7 +60,7 @@ class PurpleGrayEnemy(Sprite):
         else:
             number = randint(1, 231)
             if number == 1:
-                self._fire_enemy_bullet(astroshooter)
+                self._fire_enemy_bullet(game)
 
     def _update_hit_image(self):
         """
@@ -73,8 +74,9 @@ class PurpleGrayEnemy(Sprite):
             self.image = self.sprite_images['enemy_grey_purple']
             self.image.set_colorkey(self.settings.color_key)
 
-    def _fire_enemy_bullet(self, astroshooter):
+    def _fire_enemy_bullet(self, game):
         """Creates enemy bullets and adds them to game's sprite group."""
-        astroshooter.enemy_bullets.add(EnemyBullet(self, astroshooter))
-        astroshooter.play_sound_effect(self.settings.fire_bullet_sound,
-                                       self.settings.fire_bullet_sound_vol)
+        game.enemy_bullets.add(EnemyBullet(self, game))
+        self.game_audio.play_sound_effect(
+            self.settings.fire_bullet_sound,
+            self.settings.fire_bullet_sound_vol)

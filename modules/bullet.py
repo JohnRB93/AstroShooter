@@ -4,13 +4,13 @@ from pygame.sprite import Sprite
 class Bullet(Sprite):
     """Class to manage bullets on screen."""
 
-    def __init__(self, astrogame):
+    def __init__(self, game):
         """Initializes bullet properties."""
         super().__init__()
-        self.settings = astrogame.settings
-        self.ship = astrogame.ship.sprite
-        self.screen = astrogame.screen
-        self.sprite_images = astrogame.sprite_images
+        self.settings = game.settings
+        self.ship = game.ship.sprite
+        self.screen = game.screen
+        self.sprite_images = game.sprite_images
 
         if not self.ship.powered_up:
             self.image = self.sprite_images['bullet']
@@ -34,12 +34,12 @@ class Bullet(Sprite):
 class EnemyBullet(Sprite):
     """Class to manage enemy bullets on screen."""
 
-    def __init__(self, enemy, astrogame):
+    def __init__(self, enemy, game):
         """Initializes bullet properties."""
         super().__init__()
-        self.settings = astrogame.settings
-        self.screen = astrogame.screen
-        self.sprite_images = astrogame.sprite_images
+        self.settings = game.settings
+        self.screen = game.screen
+        self.sprite_images = game.sprite_images
         self.sprite_images = self.sprite_images
         self.image = self.sprite_images['enemy_bullet']
         self.image.set_colorkey(self.settings.color_key)

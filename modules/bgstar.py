@@ -6,12 +6,12 @@ from random import randint
 class BackGroundStar(Sprite):
     """Class to manage the background."""
 
-    def __init__(self, astroshooter):
+    def __init__(self, game):
         """Initializes the background variables."""
         super().__init__()
-        self.screen = astroshooter.screen
+        self.screen = game.screen
         self.screen_rect = self.screen.get_rect()
-        self.settings = astroshooter.settings
+        self.settings = game.settings
 
         self.radius = randint(3, 10)
         self.image = pygame.Surface((self.radius, self.radius))
